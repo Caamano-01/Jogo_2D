@@ -20,17 +20,17 @@ const mapaImage = new Image();
 mapaImage.src = 'assets/mapa_1-1.png';
 
 // dimensões de cada frame do luigi
-const spriteWidth = 83.3;
-const spriteHeight = 123;
+const spriteWidth = 79;
+const spriteHeight = 184;
 
 let gameFrame = 0;
-const animationSpeed = 5; // quanto maior, mais lenta a animação
+const animationSpeed = 4; // quanto maior, mais lenta a animação
 
 // estado do jogador e câmera
 const player = {
     x: 100,
     y: 0,
-    width: 64,  
+    width: 70,  
     height: 90,
     frameX: 0,
     frameY: 0,
@@ -57,6 +57,11 @@ window.addEventListener('keyup', e => keys[e.code] = false);
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // renderização do mapa e personagem
+    const mapScale = 2.5;
+    const mapWidth = mapaImage.width * mapScale;
+    const mapHeight = mapaImage.height * mapScale;
+
     // lógica de direção e movimento
     player.moving = false;
     if (keys['ArrowRight']) {
@@ -80,7 +85,7 @@ function animate() {
     player.y += player.vy;
 
     // colisão com o chão do mapa
-    const groundLevel = canvas.height - 180; 
+    const groundLevel = canvas.height - mapHeight + 350;
     if (player.y > groundLevel) {
         player.y = groundLevel;
         player.vy = 0;
@@ -102,8 +107,13 @@ function animate() {
         player.frameY = 0;
     }
 
-    // renderização do mapa e personagem
-    ctx.drawImage(mapaImage, -camera.x, 0, mapaImage.width * 2.5, canvas.height);
+    // câmera se move
+    camera.x = player.x - canvas.width / 2;
+
+    // impedir sair do mapa
+    camera.x = Math.max(0, Math.min(camera.x, mapWidth - canvas.width));
+
+    ctx.drawImage(mapaImage, -camera.x, canvas.height - mapHeight, mapWidth, mapHeight);
 
     ctx.save();
     if (player.lookingLeft) {
@@ -120,5 +130,19 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-// inicia quando a imagem carregar
-mapaImage.onload = animate;
+// espera o mapa e o player carregar
+let loaded = 0;
+
+function checkLoaded() {
+    loaded++;
+
+    // evita spawn no ar
+    const mapScale = 2.5;
+    const mapHeight = mapaImage.height * mapScale;
+    player.y = canvas.height - mapHeight + 350;
+
+    if (loaded === 2) animate();
+}
+
+playerImage.onload = checkLoaded;
+mapaImage.onload = checkLoaded;
