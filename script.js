@@ -59,15 +59,17 @@ const keys = {};
 window.addEventListener("keydown", (e) => keys[e.code] = true);
 window.addEventListener("keyup", (e) => keys[e.code] = false);
 
-// tilelap (agora real)
-const tileSize = 32;
-
-// 0 = vazio | 1 = chão
+// mapa
+const tileSize = 40;
 const map = [
-  Array(50).fill(0),
-  Array(50).fill(0),
-  Array(50).fill(0),
-  Array(50).fill(1)
+  Array(100).fill(0),
+  Array(100).fill(0),
+  Array(100).fill(0),
+  Array(100).fill(0),
+  Array(100).fill(0),
+  Array(100).fill(0),
+  Array(100).fill(0),
+  Array(100).fill(1) // Linha do chão
 ];
 
 // animação de movimentos
@@ -123,28 +125,27 @@ function update() {
   player.x += player.vx;
   player.y += player.vy;
 
-  // colisão com chão
+  // colisão com chão (ajustado para a altura da tela)
   player.grounded = false;
 
   map.forEach((row, y) => {
     row.forEach((tile, x) => {
-
       if (tile === 1) {
         let tileX = x * tileSize;
-        let tileY = y * tileSize;
+        // posiciona o chão no final da tela
+        let tileY = (canvas.height - tileSize) - ( (map.length - 1 - y) * tileSize );
 
         if (
           player.x < tileX + tileSize &&
           player.x + player.width > tileX &&
-          player.y < tileY + tileSize &&
-          player.y + player.height > tileY
+          player.y + player.height > tileY &&
+          player.y < tileY + tileSize
         ) {
           player.y = tileY - player.height;
           player.vy = 0;
           player.grounded = true;
         }
       }
-
     });
   });
 
@@ -170,43 +171,30 @@ function updateAnimation() {
     sprite.timer = 0;
 
     let anim = animations[sprite.state];
-
     if (sprite.frame >= anim.length) {
       sprite.frame = 0;
     }
   }
 }
 
-// desenhar mapa (tileset)
+// desenhar mapa
 function drawMap() {
-  map.forEach((row, y) => {
-    row.forEach((tile, x) => {
-
-      if (tile === 1) {
-        ctx.drawImage(
-          tileset,
-          0, 0, 32, 32, // pega o tile do tileset
-          x * tileSize - camera.x,
-          y * tileSize - camera.y,
-          tileSize,
-          tileSize
-        );
-      }
-
-    });
-  });
+  // desenha a imagem completa do mapa como cenário de fundo
+  ctx.drawImage(
+    tileset, 
+    -camera.x, 
+    0, 
+    tileset.width * 3, 
+    canvas.height
+  );
 }
 
 // player
 function drawPlayer() {
   const anim = animations[sprite.state];
-
-  // segurança: se não existir animação
   if (!anim) return;
 
   const frame = anim[sprite.frame];
-
-  // segurança: se o frame não existir
   if (!frame) return;
 
   ctx.drawImage(
