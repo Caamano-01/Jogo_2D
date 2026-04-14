@@ -1,12 +1,9 @@
 body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background-color: #5c94fc;
+  margin: 0;
+  overflow: hidden;
+  background: black;
 }
 
-#canvas {
-    display: block;
-    width: 100vw;
-    height: 100vh;
+canvas {
+  display: block;
 }
