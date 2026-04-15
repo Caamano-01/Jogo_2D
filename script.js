@@ -16,33 +16,37 @@ let deathStart = 0;
 // pontuação
 let score = 0;
 
+// vidas (novo sistema)
+let lives = 3;
+
 // tempo
 let startTime = Date.now();
 let ghostSpawned = false;
 
 // mapa (1 = parede, 2 = moeda, 0 = vazio)
 const map = [
-[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-[1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
-[1,2,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,2,1],
-[1,2,2,2,2,2,2,1,2,2,2,1,2,2,2,2,2,2,1],
-[1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1],
-[1,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,1],
-[1,2,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,2,1],
-[1,2,2,1,2,2,2,1,2,2,2,1,2,2,2,1,2,2,1],
-[1,1,2,1,1,1,2,1,1,1,1,1,2,1,1,1,2,1,1],
-[0,0,2,2,2,2,2,2,2,0,2,2,2,2,2,2,2,0,0],
-[1,1,2,1,1,1,2,1,1,0,1,1,2,1,1,1,2,1,1],
-[1,2,2,2,2,2,2,1,0,0,0,1,2,2,2,2,2,2,1],
-[1,2,1,1,2,1,2,1,1,1,1,1,2,1,2,1,1,2,1],
-[1,2,2,1,2,1,2,2,2,1,2,2,2,1,2,1,2,2,1],
-[1,1,2,1,2,1,1,1,2,1,2,1,1,1,2,1,2,1,1],
-[1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-[1,2,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,2,1],
-[1,2,2,1,2,2,2,1,2,2,2,1,2,2,2,1,2,2,1],
-[1,1,2,1,1,1,2,1,1,1,1,1,2,1,1,1,2,1,1],
-[1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
-[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
+  [1,2,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,2,1],
+  [1,2,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,2,1],
+  [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+  [1,2,1,1,2,1,2,1,1,1,1,1,2,1,2,1,1,2,1],
+  [1,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,1],
+  [1,1,1,1,2,1,1,1,0,1,0,1,1,1,2,1,1,1,1],
+  [0,0,0,1,2,1,0,0,0,0,0,0,0,1,2,1,0,0,0],
+  [1,1,1,1,2,1,0,1,1,0,1,1,0,1,2,1,1,1,1],
+  [0,0,0,0,2,0,0,1,0,0,0,1,0,0,2,0,0,0,0], 
+  [1,1,1,1,2,1,0,1,1,1,1,1,0,1,2,1,1,1,1],
+  [0,0,0,1,2,1,0,0,0,0,0,0,0,1,2,1,0,0,0],
+  [1,1,1,1,2,1,0,1,1,1,1,1,0,1,2,1,1,1,1],
+  [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
+  [1,2,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,2,1],
+  [1,2,2,1,2,2,2,2,2,0,2,2,2,2,2,1,2,2,1],
+  [1,1,2,1,2,1,2,1,1,1,1,1,2,1,2,1,2,1,1],
+  [1,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,1],
+  [1,2,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,2,1],
+  [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 ];
 
 // imagens
@@ -107,6 +111,12 @@ function isAligned() {
     return pacman.x % TILE_SIZE === 0 && pacman.y % TILE_SIZE === 0;
 }
 
+// snap grid
+function snapToGrid(entity) {
+    entity.x = Math.round(entity.x / TILE_SIZE) * TILE_SIZE;
+    entity.y = Math.round(entity.y / TILE_SIZE) * TILE_SIZE;
+}
+
 // trocar direção
 function tryChangeDirection() {
     let col = pacman.x / TILE_SIZE;
@@ -125,7 +135,7 @@ function tryChangeDirection() {
     }
 }
 
-// movimento
+// movimento pacman
 function movePacman() {
     if (isAligned()) {
         tryChangeDirection();
@@ -141,7 +151,10 @@ function movePacman() {
         if (pacman.dir === 'left') nextCol--;
         if (pacman.dir === 'right') nextCol++;
 
-        if (isWall(nextCol, nextRow)) return;
+        if (isWall(nextCol, nextRow)) {
+            snapToGrid(pacman);
+            return;
+        }
     }
 
     if (pacman.dir === 'up') pacman.y -= pacman.speed;
@@ -170,27 +183,63 @@ function handleGhostSpawn() {
     if (elapsed > 8 && !ghostSpawned) {
         ghost.active = true;
         ghostSpawned = true;
+        snapToGrid(ghost);
     }
 }
 
-// ia simples do fantasma
+// fantasma
 function updateGhost() {
     if (!ghost.active) return;
 
-    let dx = pacman.x - ghost.x;
-    let dy = pacman.y - ghost.y;
+    let directions = [
+        { x: 0, y: -ghost.speed }, // cima
+        { x: 0, y: ghost.speed },  // baixo
+        { x: -ghost.speed, y: 0 }, // esquerda
+        { x: ghost.speed, y: 0 }   // direita
+    ];
 
-    if (Math.abs(dx) > Math.abs(dy)) {
-        ghost.x += dx > 0 ? ghost.speed : -ghost.speed;
-    } else {
-        ghost.y += dy > 0 ? ghost.speed : -ghost.speed;
+    let validMoves = [];
+
+    for (let d of directions) {
+        let nx = ghost.x + d.x;
+        let ny = ghost.y + d.y;
+
+        let col = Math.floor(nx / TILE_SIZE);
+        let row = Math.floor(ny / TILE_SIZE);
+
+        if (!isWall(col, row)) {
+            validMoves.push(d);
+        }
     }
+
+    // se não tiver saída, não faz nada
+    if (validMoves.length === 0) return;
+
+    // escolhe movimento que aproxima do pacman
+    let bestMove = validMoves[0];
+    let bestDistance = Infinity;
+
+    for (let m of validMoves) {
+        let nx = ghost.x + m.x;
+        let ny = ghost.y + m.y;
+
+        let dist = Math.hypot(pacman.x - nx, pacman.y - ny);
+
+        if (dist < bestDistance) {
+            bestDistance = dist;
+            bestMove = m;
+        }
+    }
+
+    ghost.x += bestMove.x;
+    ghost.y += bestMove.y;
 }
 
 // morte
 function killPacman() {
     gameState = 'dying';
     deathStart = Date.now();
+    pacman.speed = 0;
 }
 
 // colisão
@@ -204,20 +253,30 @@ function checkCollision() {
     }
 }
 
-// reset
+// reset (com vidas)
 function resetGame() {
+    lives--;
+
     pacman.x = TILE_SIZE;
     pacman.y = TILE_SIZE;
     pacman.dir = 'right';
     pacman.nextDir = 'right';
+    pacman.speed = 2;
 
     ghost.x = 9 * TILE_SIZE;
     ghost.y = 10 * TILE_SIZE;
-    ghost.active = true;
+    ghost.active = false;
 
-    score = 0;
+    startTime = Date.now();
+    ghostSpawned = false;
 
     gameState = 'playing';
+
+    if (lives <= 0) {
+        alert('game over');
+        lives = 3;
+        score = 0;
+    }
 }
 
 // update
@@ -264,7 +323,6 @@ function draw() {
 
     drawPellets();
 
-    // pacman ou animação de morte
     if (gameState === 'dying') {
         ctx.drawImage(images.pac_death, pacman.x, pacman.y, TILE_SIZE, TILE_SIZE);
     } else {
@@ -272,15 +330,13 @@ function draw() {
         ctx.drawImage(sprite, pacman.x, pacman.y, TILE_SIZE, TILE_SIZE);
     }
 
-    // fantasma
     if (ghost.active) {
         ctx.drawImage(images.ghost, ghost.x, ghost.y, TILE_SIZE, TILE_SIZE);
     }
 
-    // pontuação
     ctx.fillStyle = 'white';
-    ctx.font = '16px Arial';
     ctx.fillText(`score: ${score}`, 10, 20);
+    ctx.fillText(`lives: ${lives}`, 10, 40);
 }
 
 // loop
