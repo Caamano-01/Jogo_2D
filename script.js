@@ -1,6 +1,10 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
+// 🚀 correção de pixel perfect (IMPORTANTE)
+ctx.imageSmoothingEnabled = false;
+canvas.style.imageRendering = 'pixelated';
+
 // configurações
 const TILE_SIZE = 32;
 const MAP_COLS = 19;
@@ -187,15 +191,15 @@ function handleGhostSpawn() {
     }
 }
 
-// fantasma
+// fantasma inteligente médio
 function updateGhost() {
     if (!ghost.active) return;
 
     let directions = [
-        { x: 0, y: -ghost.speed }, // cima
-        { x: 0, y: ghost.speed },  // baixo
-        { x: -ghost.speed, y: 0 }, // esquerda
-        { x: ghost.speed, y: 0 }   // direita
+        { x: 0, y: -ghost.speed },
+        { x: 0, y: ghost.speed },
+        { x: -ghost.speed, y: 0 },
+        { x: ghost.speed, y: 0 }
     ];
 
     let validMoves = [];
@@ -207,15 +211,11 @@ function updateGhost() {
         let col = Math.floor(nx / TILE_SIZE);
         let row = Math.floor(ny / TILE_SIZE);
 
-        if (!isWall(col, row)) {
-            validMoves.push(d);
-        }
+        if (!isWall(col, row)) validMoves.push(d);
     }
 
-    // se não tiver saída, não faz nada
     if (validMoves.length === 0) return;
 
-    // escolhe movimento que aproxima do pacman
     let bestMove = validMoves[0];
     let bestDistance = Infinity;
 
@@ -248,12 +248,10 @@ function checkCollision() {
 
     const dist = Math.hypot(pacman.x - ghost.x, pacman.y - ghost.y);
 
-    if (dist < 20) {
-        killPacman();
-    }
+    if (dist < 20) killPacman();
 }
 
-// reset (com vidas)
+// reset
 function resetGame() {
     lives--;
 
@@ -269,7 +267,6 @@ function resetGame() {
 
     startTime = Date.now();
     ghostSpawned = false;
-
     gameState = 'playing';
 
     if (lives <= 0) {
@@ -282,9 +279,7 @@ function resetGame() {
 // update
 function update() {
     if (gameState === 'dying') {
-        if (Date.now() - deathStart > 2000) {
-            resetGame();
-        }
+        if (Date.now() - deathStart > 2000) resetGame();
         return;
     }
 
@@ -319,6 +314,7 @@ function drawPellets() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // 🔥 correção principal
     ctx.drawImage(images.map, 0, 0, canvas.width, canvas.height);
 
     drawPellets();
